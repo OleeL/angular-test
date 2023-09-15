@@ -14,12 +14,12 @@ export class ThreeSceneComponent implements OnInit, OnDestroy {
 
 	constructor(private ngZone: NgZone, private el: ElementRef<HTMLElement>) {}
 
-	ngOnInit(): void {
+	ngOnInit() {
 		this.initTHREE();
 		this.animate();
 	}
 
-	private initTHREE(): void {
+	private initTHREE() {
 		const width: number = this.el?.nativeElement.clientWidth;
 		const height: number = this.el?.nativeElement.clientHeight;
 
@@ -39,7 +39,7 @@ export class ThreeSceneComponent implements OnInit, OnDestroy {
 		this.scene.add(this.cube);
 	}
 
-	private animate(): void {
+	private animate() {
 		this.ngZone.runOutsideAngular(() => {
 			if (document.readyState !== 'loading') {
 				this.render();
@@ -50,14 +50,14 @@ export class ThreeSceneComponent implements OnInit, OnDestroy {
 		});
 	}
 
-	private render = (): void => {
+	private render = () => {
 		requestAnimationFrame(this.render);
 		this.cube.rotation.x += 0.01;
 		this.cube.rotation.y += 0.01;
 		this.renderer.render(this.scene, this.camera);
 	}
 
-	private resize = (): void => {
+	private resize = () => {
 		const width: number = this.el.nativeElement.clientWidth;
 		const height: number = this.el.nativeElement.clientHeight;
 
@@ -66,7 +66,7 @@ export class ThreeSceneComponent implements OnInit, OnDestroy {
 		this.renderer.setSize(width, height);
 	}
 
-	ngOnDestroy(): void {
+	ngOnDestroy() {
 		window.removeEventListener('DOMContentLoaded', this.render);
 		window.removeEventListener('resize', this.resize);
 	}
