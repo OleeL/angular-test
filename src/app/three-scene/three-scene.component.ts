@@ -4,7 +4,7 @@ import { BoxGeometry, Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, WebGLRe
 @Component({
 	selector: 'app-three-scene',
 	template: '',
-	styleUrls: ['./three-scene.component.css'],
+	styleUrls: ['./three-scene.component.scss'],
 })
 export class ThreeSceneComponent implements OnInit, OnDestroy {
 	private renderer!: WebGLRenderer;
