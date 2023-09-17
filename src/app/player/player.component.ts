@@ -10,6 +10,7 @@ import {
 	Vector2,
 	Vector3,
 } from 'three';
+import { PlayerService } from './player.service';
 
 @Component({
 	selector: 'app-player',
@@ -21,7 +22,10 @@ export class PlayerComponent implements OnInit {
 	private moveSpeed = 0.1;
 	private moveDirection = new Vector3(0, 0, 0);
 
-	constructor(@Inject(GAME_SERVICE) private game: Game) {}
+	constructor(
+		@Inject(GAME_SERVICE) private game: Game,
+		private playerService: PlayerService,
+	) {}
 
 	ngOnInit() {
 		const geometry = new BoxGeometry();
@@ -114,5 +118,8 @@ export class PlayerComponent implements OnInit {
 
 		this.cube.position.add(deltaMove);
 		this.updateLookDirection();
+
+		// Update player position in the service.
+		this.playerService.setPosition(this.cube.position);
 	}
 }
