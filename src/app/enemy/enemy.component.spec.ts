@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PlayerComponent } from './player.component';
+import { EnemyComponent } from './enemy.component';
 import { gameServiceProvider } from 'src/providers/gameServiceProvider';
 
-describe('PlayerComponent', () => {
-	let component: PlayerComponent;
-	let fixture: ComponentFixture<PlayerComponent>;
+describe('EnemyComponent', () => {
+	let component: EnemyComponent;
+	let fixture: ComponentFixture<EnemyComponent>;
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
-			declarations: [PlayerComponent],
+			declarations: [EnemyComponent],
 			providers: [gameServiceProvider],
 		});
-		fixture = TestBed.createComponent(PlayerComponent);
+		fixture = TestBed.createComponent(EnemyComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	});

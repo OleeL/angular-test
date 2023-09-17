@@ -6,9 +6,19 @@ import { AppComponent } from './app.component';
 import { ThreeSceneComponent } from './three-scene/three-scene.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { PlayerComponent } from './player/player.component';
+import { EnemyComponent } from './enemy/enemy.component';
+
+export const appModuleExports = [
+	ThreeSceneComponent,
+	PlayerComponent,
+	EnemyComponent,
+];
+
+export const appModuleDeclarations = [AppComponent, ...appModuleExports];
 
 @NgModule({
-	declarations: [AppComponent, ThreeSceneComponent, PlayerComponent],
+	declarations: appModuleDeclarations,
+	exports: appModuleExports,
 	imports: [
 		BrowserModule,
 		AppRoutingModule,

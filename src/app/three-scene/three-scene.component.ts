@@ -6,36 +6,17 @@ import {
 	OnDestroy,
 	OnInit,
 } from '@angular/core';
+import { gameServiceProvider } from 'src/providers/gameServiceProvider';
 import { Game } from 'src/types/game';
 import { GAME_SERVICE } from 'src/utils/injectionTokens';
-import {
-	AmbientLight,
-	DirectionalLight,
-	PerspectiveCamera,
-	Scene,
-	WebGLRenderer,
-} from 'three';
+import { AmbientLight, DirectionalLight, WebGLRenderer } from 'three';
 import { degToRad } from 'three/src/math/MathUtils';
 
 @Component({
 	selector: 'app-three-scene',
 	template: ` <ng-content></ng-content> `,
 	styleUrls: ['./three-scene.component.scss'],
-	providers: [
-		{
-			provide: GAME_SERVICE,
-			useFactory: () =>
-				({
-					scene: new Scene(),
-					camera: new PerspectiveCamera(
-						75,
-						window.innerWidth / window.innerHeight,
-						0.1,
-						1000,
-					),
-				}) as Game,
-		},
-	],
+	providers: [gameServiceProvider],
 })
 export class ThreeSceneComponent implements OnInit, OnDestroy {
 	private renderer!: WebGLRenderer;

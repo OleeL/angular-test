@@ -19,7 +19,7 @@ import {
 export class PlayerComponent implements OnInit {
 	private cube!: Mesh;
 	private moveSpeed = 0.1;
-	private moveDirection = new Vector3(0, 0, 0); // Represents the direction of movement.
+	private moveDirection = new Vector3(0, 0, 0);
 
 	constructor(@Inject(GAME_SERVICE) private game: Game) {}
 
@@ -39,19 +39,19 @@ export class PlayerComponent implements OnInit {
 		switch (event.key.toLowerCase()) {
 			case 'w':
 			case 'arrowup':
-				this.moveDirection.z = -1; // Forward along Z axis
+				this.moveDirection.z = -1;
 				break;
 			case 's':
 			case 'arrowdown':
-				this.moveDirection.z = 1; // Backward along Z axis
+				this.moveDirection.z = 1;
 				break;
 			case 'a':
 			case 'arrowleft':
-				this.moveDirection.x = -1; // Left along X axis
+				this.moveDirection.x = -1;
 				break;
 			case 'd':
 			case 'arrowright':
-				this.moveDirection.x = 1; // Right along X axis
+				this.moveDirection.x = 1;
 				break;
 		}
 	}
@@ -83,25 +83,13 @@ export class PlayerComponent implements OnInit {
 		// Convert the mouse position to normalized device coordinates (-1 to +1) for both components.
 		this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 		this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-		// Update the picking ray with the camera and mouse position.
-		this.raycaster.setFromCamera(this.mouse, this.game.camera);
-
-		// Calculate the intersection of the ray with the groundPlane.
-		const intersects = this.raycaster.ray.intersectPlane(
-			this.groundPlane,
-			new Vector3(this.mouse.x, this.mouse.y, 0),
-		);
-
-		if (intersects) {
-			this.cube.lookAt(intersects);
-		}
 	}
 
 	updateLookDirection() {
 		const { x, z } = this.cube.position;
-		this.game.camera.lookAt(this.cube.position);
 		this.game.camera.position.set(x, 10, z);
+		this.game.camera.lookAt(this.cube.position);
+
 		// Update the picking ray with the camera and mouse position.
 		this.raycaster.setFromCamera(this.mouse, this.game.camera);
 
@@ -118,13 +106,13 @@ export class PlayerComponent implements OnInit {
 
 	animate() {
 		requestAnimationFrame(() => this.animate());
-		this.updateLookDirection();
-
 		const deltaMove = new Vector3(
 			this.moveDirection.x * this.moveSpeed,
 			0,
 			this.moveDirection.z * this.moveSpeed,
 		);
+
 		this.cube.position.add(deltaMove);
+		this.updateLookDirection();
 	}
 }
