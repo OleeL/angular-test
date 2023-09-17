@@ -48,7 +48,6 @@
 				"plugin:@typescript-eslint/recommended-requiring-type-checking"
 			],
 			"rules": {
-				"indent": ["error", "tab"],
 				"@typescript-eslint/indent": ["error", "tab"]
 			}
 		},
