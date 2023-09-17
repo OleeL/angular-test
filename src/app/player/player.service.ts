@@ -1,18 +1,22 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Vector3 } from 'three';
+import { BoxGeometry, Mesh, MeshStandardMaterial } from 'three';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class PlayerService {
-	private playerPosition = new BehaviorSubject<Vector3>(new Vector3(0, 0, 0));
+	private cube: BehaviorSubject<Mesh>;
 
-	setPosition(position: Vector3) {
-		this.playerPosition.next(position);
+	constructor() {
+		const geometry = new BoxGeometry();
+		const material = new MeshStandardMaterial({
+			color: 0x00ff00,
+		});
+		this.cube = new BehaviorSubject<Mesh>(new Mesh(geometry, material));
 	}
 
-	getPosition() {
-		return this.playerPosition.asObservable();
+	getCube() {
+		return this.cube.asObservable();
 	}
 }

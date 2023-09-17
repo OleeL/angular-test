@@ -3,6 +3,7 @@ import { Game } from 'src/types/game';
 import { GAME_SERVICE } from 'src/utils/injectionTokens';
 import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from 'three';
 import { PlayerService } from '../player/player.service';
+import { checkCollision } from 'src/utils/simpleCollisionDetection';
 
 @Component({
 	selector: 'app-enemy',
@@ -18,8 +19,8 @@ export class EnemyComponent implements OnInit {
 		@Inject(GAME_SERVICE) private game: Game,
 		private playerService: PlayerService,
 	) {
-		this.playerService.getPosition().subscribe(position => {
-			this.targetPosition = position;
+		this.playerService.getCube().subscribe(cube => {
+			this.targetPosition = cube.position;
 
 			// Logic to move the enemy towards the player.
 			this.moveTowardsPlayer();
@@ -57,8 +58,27 @@ export class EnemyComponent implements OnInit {
 		this.enemyCube.lookAt(this.targetPosition);
 
 		direction.normalize().multiplyScalar(this.moveSpeed);
+		// Predict next position
+		const nextPosition = this.enemyCube.position.clone().add(direction);
 
-		// Update enemy position based on direction
+		// Temporarily set the enemy's position to this next position
+		this.enemyCube.position.set(
+			nextPosition.x,
+			nextPosition.y,
+			nextPosition.z,
+		);
+
+		// Check collision with player
+		let collided = false;
+		this.playerService.getCube().subscribe(playerCube => {
+			if (checkCollision(this.enemyCube, playerCube)) {
+				this.enemyCube.position.sub(direction);
+				collided = true;
+			}
+		});
+		if (collided) return;
+
+		// Actually update enemy position
 		this.enemyCube.position.add(direction);
 	}
 

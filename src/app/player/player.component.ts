@@ -1,15 +1,7 @@
 import { Component, Inject, OnInit, HostListener } from '@angular/core';
 import { Game } from 'src/types/game';
 import { GAME_SERVICE } from 'src/utils/injectionTokens';
-import {
-	BoxGeometry,
-	Mesh,
-	MeshStandardMaterial,
-	Plane,
-	Raycaster,
-	Vector2,
-	Vector3,
-} from 'three';
+import { Plane, Raycaster, Vector2, Vector3 } from 'three';
 import { PlayerService } from './player.service';
 
 @Component({
@@ -18,7 +10,6 @@ import { PlayerService } from './player.service';
 	styleUrls: ['./player.component.scss'],
 })
 export class PlayerComponent implements OnInit {
-	private cube!: Mesh;
 	private moveSpeed = 0.1;
 	private moveDirection = new Vector3(0, 0, 0);
 
@@ -28,12 +19,9 @@ export class PlayerComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		const geometry = new BoxGeometry();
-		const material = new MeshStandardMaterial({
-			color: 0x00ff00,
+		this.playerService.getCube().subscribe(cube => {
+			this.game.scene.add(cube);
 		});
-		this.cube = new Mesh(geometry, material);
-		this.game.scene.add(this.cube);
 
 		this.animate();
 	}
@@ -90,36 +78,37 @@ export class PlayerComponent implements OnInit {
 	}
 
 	updateLookDirection() {
-		const { x, z } = this.cube.position;
-		this.game.camera.position.set(x, 10, z);
-		this.game.camera.lookAt(this.cube.position);
+		this.playerService.getCube().subscribe(cube => {
+			const { x, z } = cube.position;
+			this.game.camera.position.set(x, 10, z);
+			this.game.camera.lookAt(cube.position);
 
-		// Update the picking ray with the camera and mouse position.
-		this.raycaster.setFromCamera(this.mouse, this.game.camera);
+			// Update the picking ray with the camera and mouse position.
+			this.raycaster.setFromCamera(this.mouse, this.game.camera);
 
-		// Calculate the intersection of the ray with the groundPlane.
-		const intersects = this.raycaster.ray.intersectPlane(
-			this.groundPlane,
-			new Vector3(this.mouse.x, this.mouse.y, 0),
-		);
+			// Calculate the intersection of the ray with the groundPlane.
+			const intersects = this.raycaster.ray.intersectPlane(
+				this.groundPlane,
+				new Vector3(this.mouse.x, this.mouse.y, 0),
+			);
 
-		if (intersects) {
-			this.cube.lookAt(intersects);
-		}
+			if (intersects) {
+				cube.lookAt(intersects);
+			}
+		});
 	}
 
 	animate() {
-		requestAnimationFrame(() => this.animate());
-		const deltaMove = new Vector3(
-			this.moveDirection.x * this.moveSpeed,
-			0,
-			this.moveDirection.z * this.moveSpeed,
-		);
+		this.playerService.getCube().subscribe(cube => {
+			requestAnimationFrame(() => this.animate());
+			const deltaMove = new Vector3(
+				this.moveDirection.x * this.moveSpeed,
+				0,
+				this.moveDirection.z * this.moveSpeed,
+			);
 
-		this.cube.position.add(deltaMove);
-		this.updateLookDirection();
-
-		// Update player position in the service.
-		this.playerService.setPosition(this.cube.position);
+			cube.position.add(deltaMove);
+			this.updateLookDirection();
+		});
 	}
 }
