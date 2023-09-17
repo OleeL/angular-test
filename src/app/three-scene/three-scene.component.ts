@@ -1,16 +1,16 @@
 import {
 	Component,
 	ElementRef,
+	Inject,
 	NgZone,
 	OnDestroy,
 	OnInit,
 } from '@angular/core';
+import { Game } from 'src/types/game';
+import { GAME_SERVICE } from 'src/utils/injectionTokens';
 import {
 	AmbientLight,
-	BoxGeometry,
 	DirectionalLight,
-	Mesh,
-	MeshStandardMaterial,
 	PerspectiveCamera,
 	Scene,
 	WebGLRenderer,
@@ -19,18 +19,31 @@ import { degToRad } from 'three/src/math/MathUtils';
 
 @Component({
 	selector: 'app-three-scene',
-	template: '',
+	template: ` <ng-content></ng-content> `,
 	styleUrls: ['./three-scene.component.scss'],
+	providers: [
+		{
+			provide: GAME_SERVICE,
+			useFactory: () =>
+				({
+					scene: new Scene(),
+					camera: new PerspectiveCamera(
+						75,
+						window.innerWidth / window.innerHeight,
+						0.1,
+						1000,
+					),
+				}) as Game,
+		},
+	],
 })
 export class ThreeSceneComponent implements OnInit, OnDestroy {
 	private renderer!: WebGLRenderer;
-	private camera!: PerspectiveCamera;
-	private scene!: Scene;
-	private cube!: Mesh;
 
 	constructor(
 		private ngZone: NgZone,
 		private el: ElementRef<HTMLElement>,
+		@Inject(GAME_SERVICE) private game: Game,
 	) {}
 
 	ngOnInit() {
@@ -38,39 +51,51 @@ export class ThreeSceneComponent implements OnInit, OnDestroy {
 		this.animate();
 	}
 
-	private initTHREE() {
-		const width: number = this.el?.nativeElement.clientWidth;
-		const height: number = this.el?.nativeElement.clientHeight;
+	private initSceneLights() {
+		// Create directional light and add to the scene
+		const directionalLight = new DirectionalLight(0xffffff, 0.5);
+		directionalLight.position.set(4, 10, 1).normalize();
+		this.game.scene.add(directionalLight);
 
-		this.scene = new Scene();
-		this.scene.castShadow = true;
-		this.scene.receiveShadow = true;
-		this.camera = new PerspectiveCamera(75, width / height, 0.1, 1000);
-		this.camera.position.z = 5;
-		this.camera.position.y = 2;
-		this.camera.rotateX(degToRad(-30));
+		// Add ambient light to softly light the entire scene
+		const ambientLight = new AmbientLight(0x555555);
+		this.game.scene.add(ambientLight);
+	}
 
+	private initRenderer(width: number, height: number) {
 		this.renderer = new WebGLRenderer({
 			antialias: true,
 		});
 		this.renderer.setSize(width, height);
 		this.el.nativeElement.appendChild(this.renderer.domElement);
+		return this.renderer;
+	}
 
-		const geometry = new BoxGeometry();
-		const material = new MeshStandardMaterial({
-			color: 0x00ff00,
-		});
-		this.cube = new Mesh(geometry, material);
-		this.scene.add(this.cube);
+	private initCamera(width: number, height: number) {
+		this.game.camera.aspect = width / height;
+		this.game.camera.fov = this.game.camera.position.z = 5;
+		this.game.camera.position.y = 2;
+		this.game.camera.rotateX(degToRad(-30));
+	}
 
-		// Create directional light and add to the scene
-		const directionalLight = new DirectionalLight(0xffffff, 0.5);
-		directionalLight.position.set(4, 10, 1).normalize();
-		this.scene.add(directionalLight);
+	private initScene() {
+		this.game.scene.castShadow = true;
+		this.game.scene.receiveShadow = true;
+	}
 
-		// Add ambient light to softly light the entire scene
-		const ambientLight = new AmbientLight(0x555555);
-		this.scene.add(ambientLight);
+	private getClientWidth = () => {
+		const width = this.el?.nativeElement.clientWidth;
+		const height = this.el?.nativeElement.clientHeight;
+
+		return { width, height };
+	};
+
+	private initTHREE() {
+		const { width, height } = this.getClientWidth();
+		this.initScene();
+		this.initCamera(width, height);
+		this.initRenderer(width, height);
+		this.initSceneLights();
 	}
 
 	private animate() {
@@ -86,15 +111,15 @@ export class ThreeSceneComponent implements OnInit, OnDestroy {
 
 	private render = () => {
 		requestAnimationFrame(this.render);
-		this.renderer.render(this.scene, this.camera);
+		this.renderer.render(this.game.scene, this.game.camera);
 	};
 
 	private resize = () => {
-		const width: number = this.el.nativeElement.clientWidth;
-		const height: number = this.el.nativeElement.clientHeight;
+		const width = this.el.nativeElement.clientWidth;
+		const height = this.el.nativeElement.clientHeight;
 
-		this.camera.aspect = width / height;
-		this.camera.updateProjectionMatrix();
+		this.game.camera.aspect = width / height;
+		this.game.camera.updateProjectionMatrix();
 		this.renderer.setSize(width, height);
 	};
 
